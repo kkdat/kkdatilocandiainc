@@ -127,6 +127,19 @@
         let allMembers = [];
         let isDeleting = false;
 
+        // NEW FUNCTION: Force YYYY-MM-DD format
+        function formatDateToISO(dateString) {
+            if (!dateString || dateString === '---') return '---';
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString; // Return original if invalid
+            
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
         function checkInitialAccess() {
             if (sessionStorage.getItem('isAuthorized') === 'true') {
                 document.getElementById('loginModal').classList.add('hidden');
@@ -172,6 +185,9 @@
                 const fbUrl = (m.facebook && m.facebook !== '---') ? (m.facebook.startsWith('http') ? m.facebook : `https://facebook.com/${m.facebook}`) : null;
                 const fbDisplay = fbUrl ? `<a href="${fbUrl}" target="_blank" class="text-blue-600 font-medium hover:underline">View FB</a>` : '<span class="text-slate-400 text-xs italic">None</span>';
 
+                // Apply formatting to the display variable
+                const formattedBirth = formatDateToISO(m.birthDate);
+
                 const row = `
                     <tr class="hover:bg-slate-50 transition-colors text-xs sm:text-sm">
                         <td class="px-4 py-4">
@@ -184,7 +200,7 @@
                             <div class="text-[9px] text-slate-400 uppercase font-bold">${m.sex || '---'} | ${m.civilStatus || 'Single'}</div>
                         </td>
                         <td class="px-4 py-4">
-                            <div class="text-slate-600 text-[11px]">${m.birthDate || '---'}</div>
+                            <div class="text-slate-600 text-[11px] font-mono">${formattedBirth}</div>
                             <span class="text-[9px] font-bold px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full">${m.age || '0'} YRS</span>
                         </td>
                         <td class="px-4 py-4">
@@ -206,7 +222,6 @@
             });
         }
 
-        // UPDATED FILTER LOGIC TO INCLUDE CHAPTER
         function filterTable() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const filtered = allMembers.filter(m => 
@@ -228,7 +243,7 @@
         }
 
         checkInitialAccess();
-        setInterval(fetchData, 10000); // Reduced frequency slightly to save resources
+        setInterval(fetchData, 15000);
 
         document.getElementById('passcodeInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') validateAccess();
