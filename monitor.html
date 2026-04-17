@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Registry - Full View</title>
+    <link rel="icon" type="image/png" href="LOGO.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        .glass-panel { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); }
+        
+        .table-container::-webkit-scrollbar { height: 6px; }
+        .table-container::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
+        
+        @media print {
+            nav, .no-print, .del-col, #loginModal { display: none !important; }
+            body { background: white; color: black; }
+        }
+
+        #loginModal { backdrop-filter: blur(8px); }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 pb-12">
+
+    <div id="loginModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 px-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 transform transition-all border border-white/20">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">Admin Access</h2>
+                <p class="text-slate-500 text-sm mt-1">Please enter your passcode</p>
+            </div>
+            
+            <div class="space-y-4">
+                <input type="password" id="passcodeInput" placeholder="****" 
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-center text-lg tracking-widest">
+                
+                <button onclick="validateAccess()" 
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all">
+                    Unlock Registry
+                </button>
+                
+                <p id="errorMsg" class="text-red-500 text-xs text-center font-medium hidden">Invalid passcode. Access denied.</p>
+            </div>
+        </div>
+    </div>
+
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-white/10 no-print">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white flex items-center justify-center shadow-lg overflow-hidden">
+                    <img src="CURRIMAO.PNG" alt="Logo" class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-white font-bold text-sm sm:text-lg truncate max-w-[120px] sm:max-w-none">KKDAT Ilocandia Inc Registry</span>
+                    <span id="liveStatus" class="text-[8px] text-emerald-400 font-bold uppercase tracking-widest animate-pulse">● Live Syncing</span>
+                </div>
+            </div>
+            <div class="flex gap-2 sm:gap-4">
+                <button onclick="fetchData()" class="text-indigo-300 hover:text-white text-xs font-medium transition-colors">Refresh</button>
+                <a href="javascript:void(0)" onclick="window.open(SHEET_URL, '_blank')" class="text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1 rounded text-xs font-medium flex items-center gap-2">
+                    <span class="hidden md:inline">View Sheets</span>
+                    <span class="md:hidden">Sheet</span>
+                </a>
+                <a href="REGFORM.html" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium">Add</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="relative max-w-[98%] mx-auto pt-24 px-2 sm:px-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4 px-2">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-white uppercase tracking-tight">KKDAT II Currimao Member Database</h1>
+                <p class="text-indigo-200 text-xs sm:text-sm">Official Records - Synchronized with KKDAT database</p>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full md:w-auto no-print">
+                <div class="bg-white/10 border border-white/20 rounded-xl px-4 py-2 sm:py-3 flex flex-col justify-center min-w-[100px] shadow-lg">
+                    <span class="text-[10px] text-indigo-300 uppercase font-bold leading-none">Total Members</span>
+                    <span id="memberCount" class="text-white text-lg font-bold">0</span>
+                </div>
+
+                <div class="relative w-full md:w-80">
+                    <input type="text" id="searchInput" placeholder="Search by name, address, or chapter..." 
+                        class="pl-10 pr-4 py-2 sm:py-3 rounded-xl w-full outline-none border-none shadow-xl focus:ring-2 focus:ring-indigo-500 transition-all text-sm" 
+                        onkeyup="filterTable()">
+                    <span class="absolute left-3 top-2.5 sm:top-3.5 text-slate-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2"></path></svg>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-white/10">
+            <div class="overflow-x-auto table-container">
+                <table class="w-full text-left border-collapse min-w-[1000px]">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200">
+                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-indigo-600 uppercase">Chapter</th>
+                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-slate-500 uppercase">Name & Sex</th>
+                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-slate-500 uppercase">Birth & Age</th>
+                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-slate-500 uppercase">Contact Info</th>
+                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-slate-500 uppercase">Address</th>
+                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-slate-500 uppercase">Social Media</th>
+                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-slate-500 uppercase">Emergency</th>
+                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-slate-500 uppercase text-center del-col">Del</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100 bg-white">
+                        <tr><td colspan="8" class="px-6 py-20 text-center"><p class="text-slate-500 animate-pulse text-lg font-medium">Please login to view data...</p></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const AUTHORIZED_PASSCODES = ["1996-11-06", "2006-01-24", "2006-11-13"];
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6jH7ujv4h7pzQwbM5fkCsasKQrdn8RIyCQApLZGFO6U9YWQAkGn4-bEskZlUlEHQMwA/exec";
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/1o98Bj1tqKQOo_xdGNDNNW8h1SS_kTdYyFASBIhaK5ts/edit?usp=sharing";
+
+        let allMembers = [];
+        let isDeleting = false;
+
+        function checkInitialAccess() {
+            if (sessionStorage.getItem('isAuthorized') === 'true') {
+                document.getElementById('loginModal').classList.add('hidden');
+                fetchData();
+            }
+        }
+
+        function validateAccess() {
+            const entry = document.getElementById('passcodeInput').value;
+            const errorElement = document.getElementById('errorMsg');
+            
+            if (AUTHORIZED_PASSCODES.includes(entry)) {
+                sessionStorage.setItem('isAuthorized', 'true');
+                document.getElementById('loginModal').classList.add('hidden');
+                fetchData();
+            } else {
+                errorElement.classList.remove('hidden');
+                document.getElementById('passcodeInput').value = '';
+            }
+        }
+
+        async function fetchData() {
+            if (isDeleting || sessionStorage.getItem('isAuthorized') !== 'true') return;
+            try {
+                const response = await fetch(SCRIPT_URL);
+                allMembers = await response.json();
+                const query = document.getElementById('searchInput').value;
+                if (!query) renderTable(allMembers);
+            } catch (error) { console.error("Fetch Error:", error); }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            document.getElementById('memberCount').innerText = data ? data.length : 0;
+            tbody.innerHTML = '';
+            
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-20 text-center text-slate-400 text-lg font-medium">No records found.</td></tr>';
+                return;
+            }
+
+            data.forEach(m => {
+                const fbUrl = (m.facebook && m.facebook !== '---') ? (m.facebook.startsWith('http') ? m.facebook : `https://facebook.com/${m.facebook}`) : null;
+                const fbDisplay = fbUrl ? `<a href="${fbUrl}" target="_blank" class="text-blue-600 font-medium hover:underline">View FB</a>` : '<span class="text-slate-400 text-xs italic">None</span>';
+
+                const row = `
+                    <tr class="hover:bg-slate-50 transition-colors text-xs sm:text-sm">
+                        <td class="px-4 py-4">
+                            <span class="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-md font-bold text-[10px] uppercase border border-indigo-100">
+                                ${m.chapter || 'UNASSIGNED'}
+                            </span>
+                        </td>
+                        <td class="px-4 py-4">
+                            <div class="font-bold text-slate-800 uppercase">${m.fullName || '---'}</div>
+                            <div class="text-[9px] text-slate-400 uppercase font-bold">${m.sex || '---'} | ${m.civilStatus || 'Single'}</div>
+                        </td>
+                        <td class="px-4 py-4">
+                            <div class="text-slate-600 text-[11px]">${m.birthDate || '---'}</div>
+                            <span class="text-[9px] font-bold px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full">${m.age || '0'} YRS</span>
+                        </td>
+                        <td class="px-4 py-4">
+                            <div class="text-slate-800 font-medium text-[11px]">${m.mobileNumber || 'No Phone'}</div>
+                            <div class="text-slate-500 text-[10px] truncate max-w-[120px]">${m.email || 'No Email'}</div>
+                        </td>
+                        <td class="px-4 py-4">
+                            <div class="max-w-[180px] text-slate-600 text-[11px] line-clamp-2 uppercase">${m.address || '---'}</div>
+                        </td>
+                        <td class="px-4 py-4">${fbDisplay}</td>
+                        <td class="px-4 py-4"><div class="text-slate-700 font-semibold text-[11px]">${m.contactPerson || '---'}</div></td>
+                        <td class="px-4 py-4 text-center del-col">
+                            <button onclick="deleteMember(${m.rowId})" class="text-slate-300 hover:text-red-500 transition-colors p-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                            </button>
+                        </td>
+                    </tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        // UPDATED FILTER LOGIC TO INCLUDE CHAPTER
+        function filterTable() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allMembers.filter(m => 
+                (m.fullName && m.fullName.toLowerCase().includes(query)) || 
+                (m.address && m.address.toLowerCase().includes(query)) ||
+                (m.chapter && m.chapter.toLowerCase().includes(query))
+            );
+            renderTable(filtered);
+        }
+
+        async function deleteMember(rowId) {
+            if (!confirm("Delete this entry permanently?")) return;
+            isDeleting = true;
+            document.getElementById('tableBody').innerHTML = '<tr><td colspan="8" class="text-center py-10 font-bold text-red-500 animate-pulse">Deleting...</td></tr>';
+            try {
+                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'delete', rowId: rowId }) });
+                setTimeout(() => { isDeleting = false; fetchData(); }, 2000);
+            } catch (error) { isDeleting = false; fetchData(); }
+        }
+
+        checkInitialAccess();
+        setInterval(fetchData, 10000); // Reduced frequency slightly to save resources
+
+        document.getElementById('passcodeInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') validateAccess();
+        });
+    </script>
+</body>
+</html>
