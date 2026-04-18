@@ -3,282 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Member Registry - Full View</title>
+    <title>KKDAT Ilocandia Inc - Social Hub</title>
     <link rel="icon" type="image/png" href="LOGO.png">
+    <meta name="theme-color" content="#0f172a">
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         * { font-family: 'Inter', sans-serif; }
-        .glass-panel { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); }
-        
-        .table-container::-webkit-scrollbar { height: 6px; }
-        .table-container::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
-        
-        @media print {
-            nav, .no-print, .del-col, #loginModal { display: none !important; }
-            body { background: white; color: black; }
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e40af 50%, #60a5fa 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        #loginModal { backdrop-filter: blur(8px); }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        /* Thumbnail Grid Styles */
+        .thumb-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .thumb-item {
+            aspect-ratio: 1/1;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .thumb-item:hover {
+            transform: scale(1.05);
+            border-color: #60a5fa;
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.4);
+        }
+
+        /* Popup Carousel Overlay */
+        #galleryModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-carousel-container {
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+        }
+
+        .modal-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-slide {
+            min-width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-slide img {
+            max-height: 70vh;
+            width: auto;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 50%;
+            color: white;
+            transition: background 0.3s;
+        }
+        .nav-btn:hover { background: rgba(255,255,255,0.3); }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 pb-12">
+<body class="text-white py-8 px-4">
 
-    <div id="loginModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 px-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 transform transition-all border border-white/20">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
+    <div class="max-w-5xl mx-auto text-center mb-12">
+        <div class="w-24 h-24 bg-white/10 rounded-full mx-auto mb-4 p-1 border border-white/20 overflow-hidden">
+            <img src="CURRIMAO.PNG" class="w-full h-full object-cover rounded-full">
+        </div>
+        <h1 class="text-3xl md:text-5xl font-black">KKDAT Ilocandia Inc.</h1>
+    </div>
+
+    <div class="max-w-5xl mx-auto">
+        <h2 class="text-xl font-bold mb-6 flex items-center gap-4">
+            <span class="h-px flex-1 bg-white/20"></span>
+            Event Gallery
+            <span class="h-px flex-1 bg-white/20"></span>
+        </h2>
+
+        <div class="glass-card p-6 rounded-[2.5rem]">
+            <div class="thumb-grid" id="mainGrid">
                 </div>
-                <h2 class="text-2xl font-bold text-slate-800">Admin Access</h2>
-                <p class="text-slate-500 text-sm mt-1">Please enter your passcode</p>
-            </div>
-            
-            <div class="space-y-4">
-                <input type="password" id="passcodeInput" placeholder="****" 
-                    class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-center text-lg tracking-widest">
-                
-                <button onclick="validateAccess()" 
-                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all">
-                    Unlock Registry
-                </button>
-                
-                <p id="errorMsg" class="text-red-500 text-xs text-center font-medium hidden">Invalid passcode. Access denied.</p>
-            </div>
         </div>
     </div>
 
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-white/10 no-print">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-            <div class="flex items-center gap-2 sm:gap-3">
-                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white flex items-center justify-center shadow-lg overflow-hidden">
-                    <img src="LOGO.png" alt="Logo" class="w-full h-full object-cover">
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-white font-bold text-sm sm:text-lg truncate max-w-[120px] sm:max-w-none">KKDAT Ilocandia Inc Registry</span>
-                    <span id="liveStatus" class="text-[8px] text-emerald-400 font-bold uppercase tracking-widest animate-pulse">● Live Syncing</span>
-                </div>
-            </div>
-            <div class="flex gap-2 sm:gap-4">
-                <button onclick="fetchData()" class="text-indigo-300 hover:text-white text-xs font-medium transition-colors">Refresh</button>
-                <a href="javascript:void(0)" onclick="window.open(SHEET_URL, '_blank')" class="text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1 rounded text-xs font-medium flex items-center gap-2">
-                    <span class="hidden md:inline">View Sheets</span>
-                    <span class="md:hidden">Sheet</span>
-                </a>
-                <a href="index.html" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium">Add</a>
-            </div>
-        </div>
-    </nav>
-
-    <div class="relative max-w-[98%] mx-auto pt-24 px-2 sm:px-4">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4 px-2">
-            <div>
-                <h1 class="text-2xl sm:text-3xl font-bold text-white uppercase tracking-tight">KKDAT Ilocandia Inc Member Database</h1>
-                <p class="text-indigo-200 text-xs sm:text-sm">Official Records - Synchronized with KKDAT database</p>
-            </div>
-            
-            <div class="flex flex-wrap items-center gap-3 w-full md:w-auto no-print">
-                <div class="bg-white/10 border border-white/20 rounded-xl px-4 py-2 sm:py-3 flex flex-col justify-center min-w-[100px] shadow-lg">
-                    <span class="text-[10px] text-indigo-300 uppercase font-bold leading-none">Total Members</span>
-                    <span id="memberCount" class="text-white text-lg font-bold">0</span>
-                </div>
-
-                <div class="relative">
-                    <select id="chapterFilter" onchange="filterTable()" 
-                        class="appearance-none bg-white/10 border border-white/20 rounded-xl px-4 py-2 sm:py-3 text-white text-xs font-bold uppercase tracking-wide outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-lg pr-10">
-                        <option value="ALL" class="bg-slate-800 text-white">All Chapters</option>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-indigo-300">
-                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
-                    </div>
-                </div>
-
-                <div class="relative w-full md:w-72 lg:w-80">
-                    <input type="text" id="searchInput" placeholder="Search name or address..." 
-                        class="pl-10 pr-4 py-2 sm:py-3 rounded-xl w-full outline-none border-none shadow-xl focus:ring-2 focus:ring-indigo-500 transition-all text-sm" 
-                        onkeyup="filterTable()">
-                    <span class="absolute left-3 top-2.5 sm:top-3.5 text-slate-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2"></path></svg>
-                    </span>
-                </div>
-            </div>
+    <div id="galleryModal">
+        <div class="absolute top-6 right-6 flex gap-4 z-50">
+            <button onclick="toggleAutoplay()" id="playPauseBtn" class="text-white bg-white/10 px-4 py-2 rounded-full border border-white/20 hover:bg-white/20">
+                <i class="fa-solid fa-pause"></i>
+            </button>
+            <button onclick="closeGallery()" class="text-white text-3xl hover:text-red-400">&times;</button>
         </div>
 
-        <div class="glass-panel rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-white/10">
-            <div class="overflow-x-auto table-container">
-                <table class="w-full text-left border-collapse min-w-[1000px]">
-                    <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200">
-                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-indigo-600 uppercase">Chapter</th>
-                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-slate-500 uppercase">Name & Sex</th>
-                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-slate-500 uppercase">Birth & Age</th>
-                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-slate-500 uppercase">Contact Info</th>
-                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-slate-500 uppercase">Address</th>
-                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-slate-500 uppercase">Social Media</th>
-                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-slate-500 uppercase">Emergency</th>
-                            <th class="px-4 py-4 text-[10px] sm:text-xs font-bold text-slate-500 uppercase text-center del-col">Del</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-100 bg-white">
-                        <tr><td colspan="8" class="px-6 py-20 text-center"><p class="text-slate-500 animate-pulse text-lg font-medium">Please login to view data...</p></td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="modal-carousel-container glass-card p-4">
+            <div class="modal-track" id="modalTrack">
+                </div>
+
+            <button onclick="prevSlide()" class="nav-btn left-4"><i class="fa-solid fa-chevron-left"></i></button>
+            <button onclick="nextSlide()" class="nav-btn right-4"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
+        
+        <p id="imageCaption" class="mt-6 text-blue-200 font-bold tracking-widest uppercase text-sm"></p>
     </div>
 
     <script>
-        const AUTHORIZED_PASSCODES = ["1996-11-06", "2006-01-24", "2006-11-13"];
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw39tfv_1JoA5fkzQT0W9W4vK6Vj1qWDbIBVs54lRk6KTRbfsrbT4Wsj5FfKWs0yOqndA/exec";
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/1o98Bj1tqKQOo_xdGNDNNW8h1SS_kTdYyFASBIhaK5ts/edit?usp=sharing";
+        // Gallery Data Array
+        const galleryImages = [
+            { src: 'assets/ELECTION/ELECT1.jpg', title: 'ELECTION 2026' },
+            { src: 'assets/ELECTION/ELECT2.jpg', title: 'ELECTION 2026' },
+            { src: 'assets/OPLAN KRUS/OK11.jpg', title: 'OPLAN KRUS' },
+            { src: 'assets/OPLAN KRUS/OK2.jpg', title: 'OPLAN KRUS' },
+            { src: 'assets/OPLAN BALLAAG/OB1.jpg', title: 'OPLAN BALLAAG' },
+            { src: 'assets/OPLAN BALLAAG/OB2.jpg', title: 'OPLAN BALLAAG' },
+            { src: 'assets/ELECTION/ELECT3.jpg', title: 'ELECTION 2026' },
+            { src: 'assets/OPLAN KRUS/OK3.jpg', title: 'OPLAN KRUS' }
+        ];
 
-        let allMembers = [];
-        let isDeleting = false;
+        let currentIndex = 0;
+        let autoPlayInterval;
+        let isPlaying = true;
 
-        function formatDateToISO(dateString) {
-            if (!dateString || dateString === '---') return '---';
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return dateString;
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
-            return `${yyyy}-${mm}-${dd}`;
-        }
+        const grid = document.getElementById('mainGrid');
+        const track = document.getElementById('modalTrack');
+        const modal = document.getElementById('galleryModal');
+        const caption = document.getElementById('imageCaption');
 
-        // NEW: Populate the Chapter Filter dropdown dynamically
-        function updateChapterFilterOptions(data) {
-            const select = document.getElementById('chapterFilter');
-            const currentValue = select.value;
-            const chapters = [...new Set(data.map(m => (m.chapter || 'UNASSIGNED').toUpperCase()))].sort();
-            
-            select.innerHTML = '<option value="ALL" class="bg-slate-800 text-white">All Chapters</option>';
-            chapters.forEach(ch => {
-                const opt = document.createElement('option');
-                opt.value = ch;
-                opt.textContent = ch;
-                opt.className = "bg-slate-800 text-white";
-                select.appendChild(opt);
-            });
-            
-            // Retain selection if it still exists
-            if (chapters.includes(currentValue)) select.value = currentValue;
-        }
+        // 1. Initialize Thumbnails and Modal Slides
+        function initGallery() {
+            galleryImages.forEach((img, idx) => {
+                // Add to Grid
+                const thumb = document.createElement('div');
+                thumb.className = 'thumb-item';
+                thumb.innerHTML = `<img src="${img.src}" class="w-full h-full object-cover" loading="lazy">`;
+                thumb.onclick = () => openGallery(idx);
+                grid.appendChild(thumb);
 
-        function checkInitialAccess() {
-            if (sessionStorage.getItem('isAuthorized') === 'true') {
-                document.getElementById('loginModal').classList.add('hidden');
-                fetchData();
-            }
-        }
-
-        function validateAccess() {
-            const entry = document.getElementById('passcodeInput').value;
-            const errorElement = document.getElementById('errorMsg');
-            if (AUTHORIZED_PASSCODES.includes(entry)) {
-                sessionStorage.setItem('isAuthorized', 'true');
-                document.getElementById('loginModal').classList.add('hidden');
-                fetchData();
-            } else {
-                errorElement.classList.remove('hidden');
-                document.getElementById('passcodeInput').value = '';
-            }
-        }
-
-        async function fetchData() {
-            if (isDeleting || sessionStorage.getItem('isAuthorized') !== 'true') return;
-            try {
-                const response = await fetch(SCRIPT_URL);
-                allMembers = await response.json();
-                updateChapterFilterOptions(allMembers);
-                filterTable();
-            } catch (error) { console.error("Fetch Error:", error); }
-        }
-
-        function renderTable(data) {
-            const tbody = document.getElementById('tableBody');
-            document.getElementById('memberCount').innerText = data ? data.length : 0;
-            tbody.innerHTML = '';
-            
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-20 text-center text-slate-400 text-lg font-medium">No records found.</td></tr>';
-                return;
-            }
-
-            data.forEach(m => {
-                const fbUrl = (m.facebook && m.facebook !== '---') ? (m.facebook.startsWith('http') ? m.facebook : `https://facebook.com/${m.facebook}`) : null;
-                const fbDisplay = fbUrl ? `<a href="${fbUrl}" target="_blank" class="text-blue-600 font-medium hover:underline">View FB</a>` : '<span class="text-slate-400 text-xs italic">None</span>';
-                const formattedBirth = formatDateToISO(m.birthDate);
-
-                const row = `
-                    <tr class="hover:bg-slate-50 transition-colors text-xs sm:text-sm">
-                        <td class="px-4 py-4">
-                            <span class="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-md font-bold text-[10px] uppercase border border-indigo-100">
-                                ${m.chapter || 'UNASSIGNED'}
-                            </span>
-                        </td>
-                        <td class="px-4 py-4">
-                            <div class="font-bold text-slate-800 uppercase">${m.fullName || '---'}</div>
-                            <div class="text-[9px] text-slate-400 uppercase font-bold">${m.sex || '---'} | ${m.civilStatus || 'Single'}</div>
-                        </td>
-                        <td class="px-4 py-4">
-                            <div class="text-slate-600 text-[11px] font-mono">${formattedBirth}</div>
-                            <span class="text-[9px] font-bold px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full">${m.age || '0'} YRS</span>
-                        </td>
-                        <td class="px-4 py-4">
-                            <div class="text-slate-800 font-medium text-[11px]">${m.mobileNumber || 'No Phone'}</div>
-                            <div class="text-slate-500 text-[10px] truncate max-w-[120px]">${m.email || 'No Email'}</div>
-                        </td>
-                        <td class="px-4 py-4">
-                            <div class="max-w-[180px] text-slate-600 text-[11px] line-clamp-2 uppercase">${m.address || '---'}</div>
-                        </td>
-                        <td class="px-4 py-4">${fbDisplay}</td>
-                        <td class="px-4 py-4"><div class="text-slate-700 font-semibold text-[11px]">${m.contactPerson || '---'}</div></td>
-                        <td class="px-4 py-4 text-center del-col">
-                            <button onclick="deleteMember(${m.rowId})" class="text-slate-300 hover:text-red-500 transition-colors p-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                            </button>
-                        </td>
-                    </tr>`;
-                tbody.insertAdjacentHTML('beforeend', row);
+                // Add to Modal Track
+                const slide = document.createElement('div');
+                slide.className = 'modal-slide';
+                slide.innerHTML = `<img src="${img.src}">`;
+                track.appendChild(slide);
             });
         }
 
-        // UPDATED: Filter logic handles both Chapter selection and Search query
-        function filterTable() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const chapter = document.getElementById('chapterFilter').value;
-
-            const filtered = allMembers.filter(m => {
-                const matchesSearch = (m.fullName && m.fullName.toLowerCase().includes(query)) || 
-                                     (m.address && m.address.toLowerCase().includes(query));
-                
-                const mChapter = (m.chapter || 'UNASSIGNED').toUpperCase();
-                const matchesChapter = (chapter === 'ALL' || mChapter === chapter);
-
-                return matchesSearch && matchesChapter;
-            });
-            
-            renderTable(filtered);
+        // 2. Open Gallery & Start Carousel
+        function openGallery(index) {
+            currentIndex = index;
+            modal.style.display = 'flex';
+            updateCarousel();
+            startAutoplay();
+            document.body.style.overflow = 'hidden'; // Prevent scroll
         }
 
-        async function deleteMember(rowId) {
-            if (!confirm("Delete this entry permanently?")) return;
-            isDeleting = true;
-            document.getElementById('tableBody').innerHTML = '<tr><td colspan="8" class="text-center py-10 font-bold text-red-500 animate-pulse">Deleting...</td></tr>';
-            try {
-                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'delete', rowId: rowId }) });
-                setTimeout(() => { isDeleting = false; fetchData(); }, 2000);
-            } catch (error) { isDeleting = false; fetchData(); }
+        function closeGallery() {
+            modal.style.display = 'none';
+            stopAutoplay();
+            document.body.style.overflow = 'auto';
         }
 
-        checkInitialAccess();
-        setInterval(fetchData, 15000);
+        // 3. Carousel Logic
+        function updateCarousel() {
+            const offset = -currentIndex * 100;
+            track.style.transform = `translateX(${offset}%)`;
+            caption.innerText = galleryImages[currentIndex].title;
+        }
 
-        document.getElementById('passcodeInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') validateAccess();
+        function nextSlide() {
+            currentIndex = (currentIndex + 1) % galleryImages.length;
+            updateCarousel();
+        }
+
+        function prevSlide() {
+            currentIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
+            updateCarousel();
+        }
+
+        // 4. Autoplay Logic
+        function startAutoplay() {
+            stopAutoplay(); // Clear existing
+            isPlaying = true;
+            document.getElementById('playPauseBtn').innerHTML = '<i class="fa-solid fa-pause"></i>';
+            autoPlayInterval = setInterval(nextSlide, 3000); // Change image every 3 seconds
+        }
+
+        function stopAutoplay() {
+            clearInterval(autoPlayInterval);
+            isPlaying = false;
+            document.getElementById('playPauseBtn').innerHTML = '<i class="fa-solid fa-play"></i>';
+        }
+
+        function toggleAutoplay() {
+            isPlaying ? stopAutoplay() : startAutoplay();
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (modal.style.display === 'flex') {
+                if (e.key === 'ArrowRight') nextSlide();
+                if (e.key === 'ArrowLeft') prevSlide();
+                if (e.key === 'Escape') closeGallery();
+            }
         });
+
+        window.onload = initGallery;
     </script>
 </body>
 </html>
