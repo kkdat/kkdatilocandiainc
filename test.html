@@ -18,230 +18,236 @@
             background-attachment: fixed;
             min-height: 100vh;
             overflow-x: hidden;
+            position: relative;
         }
 
         .glass-card {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
 
-        /* Thumbnail Grid Styles */
+        /* NEW: Thumbnail Grid Styles */
         .thumb-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 12px;
         }
-
         .thumb-item {
             aspect-ratio: 1/1;
-            border-radius: 16px;
+            border-radius: 12px;
             overflow: hidden;
             cursor: pointer;
             border: 2px solid rgba(255,255,255,0.1);
             transition: all 0.3s ease;
         }
+        .thumb-item:hover { transform: scale(1.05); border-color: #60a5fa; }
 
-        .thumb-item:hover {
-            transform: scale(1.05);
-            border-color: #60a5fa;
-            box-shadow: 0 0 20px rgba(96, 165, 250, 0.4);
-        }
-
-        /* Popup Carousel Overlay */
+        /* NEW: Popup Carousel Styles */
         #galleryModal {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(20px);
-            z-index: 1000;
-            flex-direction: column;
+            background: rgba(0, 0, 10, 0.95);
+            backdrop-filter: blur(15px);
+            z-index: 2000;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
         }
-
-        .modal-carousel-container {
+        .modal-container {
             width: 90%;
-            max-width: 800px;
+            max-width: 900px;
             position: relative;
             overflow: hidden;
-            border-radius: 24px;
         }
-
         .modal-track {
             display: flex;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
-
         .modal-slide {
             min-width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
         }
-
         .modal-slide img {
-            max-height: 70vh;
+            max-height: 75vh;
             width: auto;
-            object-fit: contain;
-            border-radius: 12px;
+            border-radius: 1rem;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
 
-        .nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255,255,255,0.1);
-            padding: 1rem;
-            border-radius: 50%;
-            color: white;
-            transition: background 0.3s;
-        }
-        .nav-btn:hover { background: rgba(255,255,255,0.3); }
+        .video-thumbnail { aspect-ratio: 16 / 9; object-fit: cover; }
     </style>
 </head>
-<body class="text-white py-8 px-4">
-
-    <div class="max-w-5xl mx-auto text-center mb-12">
-        <div class="w-24 h-24 bg-white/10 rounded-full mx-auto mb-4 p-1 border border-white/20 overflow-hidden">
-            <img src="CURRIMAO.PNG" class="w-full h-full object-cover rounded-full">
-        </div>
-        <h1 class="text-3xl md:text-5xl font-black">KKDAT Ilocandia Inc.</h1>
-    </div>
-
-    <div class="max-w-5xl mx-auto">
-        <h2 class="text-xl font-bold mb-6 flex items-center gap-4">
-            <span class="h-px flex-1 bg-white/20"></span>
-            Event Gallery
-            <span class="h-px flex-1 bg-white/20"></span>
-        </h2>
-
-        <div class="glass-card p-6 rounded-[2.5rem]">
-            <div class="thumb-grid" id="mainGrid">
-                </div>
-        </div>
-    </div>
+<body class="text-white py-8 md:py-12 px-4 sm:px-6">
 
     <div id="galleryModal">
-        <div class="absolute top-6 right-6 flex gap-4 z-50">
-            <button onclick="toggleAutoplay()" id="playPauseBtn" class="text-white bg-white/10 px-4 py-2 rounded-full border border-white/20 hover:bg-white/20">
-                <i class="fa-solid fa-pause"></i>
-            </button>
-            <button onclick="closeGallery()" class="text-white text-3xl hover:text-red-400">&times;</button>
-        </div>
-
-        <div class="modal-carousel-container glass-card p-4">
-            <div class="modal-track" id="modalTrack">
-                </div>
-
-            <button onclick="prevSlide()" class="nav-btn left-4"><i class="fa-solid fa-chevron-left"></i></button>
-            <button onclick="nextSlide()" class="nav-btn right-4"><i class="fa-solid fa-chevron-right"></i></button>
-        </div>
+        <button onclick="closeGallery()" class="absolute top-6 right-8 text-white text-4xl z-50 hover:text-red-400 transition-colors">&times;</button>
         
-        <p id="imageCaption" class="mt-6 text-blue-200 font-bold tracking-widest uppercase text-sm"></p>
+        <div class="modal-container glass-card p-4 rounded-[2rem]">
+            <div id="modalTrack" class="modal-track">
+                </div>
+            
+            <button onclick="prevSlide()" class="absolute left-6 top-1/2 -translate-y-1/2 bg-white/10 p-4 rounded-full hover:bg-white/20">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button onclick="nextSlide()" class="absolute right-6 top-1/2 -translate-y-1/2 bg-white/10 p-4 rounded-full hover:bg-white/20">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+        <p id="modalCaption" class="mt-6 font-bold tracking-widest uppercase text-blue-200"></p>
+    </div>
+
+    <div class="max-w-5xl mx-auto relative">
+        <div class="text-center mb-10 md:mb-12">
+            <div class="w-24 h-24 bg-white/10 backdrop-blur-sm rounded-full mx-auto mb-4 p-1.5 shadow-lg border border-white/20 overflow-hidden">
+                <img src="CURRIMAO.PNG" alt="Logo" class="w-full h-full object-cover rounded-full">
+            </div>
+            <h1 class="text-3xl md:text-5xl font-black text-white tracking-tight drop-shadow-md">KKDAT Ilocandia Incorporated</h1>
+            <p class="text-blue-100 text-sm mt-1 uppercase tracking-[0.4em] font-bold">Official Social Media Hub</p>
+        </div>
+
+        <div class="mb-12 relative">
+            <h2 class="text-lg font-semibold text-white mb-6 flex items-center gap-3">
+                <span class="h-px flex-1 bg-white/10"></span> Featured Activity <span class="h-px flex-1 bg-white/10"></span>
+            </h2>
+            <div class="flex justify-center">
+                <div class="w-full max-w-2xl glass-card p-3 rounded-[3rem] overflow-hidden shadow-2xl relative">
+                    <div class="relative group overflow-hidden rounded-[2.5rem] h-full min-h-[300px] border-2 border-white/10">
+                        <img src="assets/PROGRESS.png" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-transparent to-transparent flex flex-col justify-end p-8">
+                            <h3 class="text-white font-black text-2xl">Wwelcome, kabsat!</h3>
+                            <p class="text-blue-100 text-xs font-medium">Naragsak a isasangbay iti KKDAT Ilocandia Inc Social Hub!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card mb-20 p-5 rounded-[2.5rem] relative z-10">
+            <div class="flex flex-wrap gap-6 items-center justify-center md:justify-between px-2">
+                <p class="text-[11px] uppercase tracking-[0.2em] font-bold text-blue-100 flex items-center gap-3">
+                    <span class="w-5 h-px bg-blue-300/30"></span>Connect & Join Us<span class="w-5 h-px bg-blue-300/30"></span>
+                </p>
+                <div class="flex flex-wrap gap-4 items-center justify-center">
+                    <a href="REGFORM.html" class="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-bold text-xs uppercase tracking-wider transition-all hover:scale-105 shadow-lg border border-indigo-400/30">
+                        <i class="fa-solid fa-user-plus"></i> Register Now
+                    </a>
+                    <div class="flex gap-3">
+                        <a href="https://www.facebook.com/KKDATCurrimaoPower" target="_blank" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-blue-600 transition-all"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="https://www.youtube.com/@kkdatcurrimaochapter2731" target="_blank" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-red-600 transition-all"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="mailto:kkdatcurrimao@gmail.com" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-emerald-500 transition-all"><i class="fa-solid fa-envelope"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-20">
+            <h2 class="text-xl font-bold text-white mb-8 flex items-center gap-4">
+                <span class="h-0.5 flex-1 bg-white/20 rounded-full"></span> Event Gallery <span class="h-0.5 flex-1 bg-white/20 rounded-full"></span>
+            </h2>
+            <div class="glass-card p-6 rounded-[2.5rem]">
+                <div id="thumbnailGrid" class="thumb-grid">
+                    </div>
+            </div>
+        </div>
+
+        <div class="space-y-6 relative pb-20">
+             <h2 class="text-xl font-bold text-white px-2 flex items-center gap-4 relative z-10">
+                <span class="h-0.5 flex-1 bg-white/20 rounded-full"></span> Latest Content <span class="h-0.5 flex-1 bg-white/20 rounded-full"></span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                <a href="https://www.facebook.com/reel/2106853370157580" target="_blank" class="glass-card block rounded-[2.5rem] overflow-hidden group shadow-xl hover:-translate-y-2 transition-transform duration-300">
+                    <img src="assets/SEMANA SANTA.jpg" class="video-thumbnail w-full transition-transform duration-500 group-hover:scale-105">
+                    <div class="p-6 bg-white/5 flex items-center justify-between">
+                        <h3 class="font-extrabold text-white text-lg">Ligtas SUMVAC 2026</h3>
+                        <i class="fa-brands fa-facebook text-2xl opacity-50 group-hover:opacity-100"></i>
+                    </div>
+                </a>
+                <a href="https://www.facebook.com/watch/?v=2155328388156802" target="_blank" class="glass-card block rounded-[2.5rem] overflow-hidden group shadow-xl hover:-translate-y-2 transition-transform duration-300">
+                    <img src="assets/GABRIELA.png" class="video-thumbnail w-full transition-transform duration-500 group-hover:scale-105">
+                    <div class="p-6 bg-white/5 flex items-center justify-between">
+                        <h3 class="font-extrabold text-white text-lg">Positibong Kuwentuhan</h3>
+                        <i class="fa-brands fa-facebook text-2xl opacity-50 group-hover:opacity-100"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <footer class="text-center py-12 opacity-60">
+            <p class="text-[10px] uppercase tracking-[0.4em] font-bold text-white">KKDAT II Currimao • Ilocos Norte</p>
+        </footer>
     </div>
 
     <script>
-        // Gallery Data Array
-        const galleryImages = [
-            { src: 'assets/ELECTION/ELECT1.jpg', title: 'ELECTION 2026' },
-            { src: 'assets/ELECTION/ELECT2.jpg', title: 'ELECTION 2026' },
-            { src: 'assets/OPLAN KRUS/OK11.jpg', title: 'OPLAN KRUS' },
-            { src: 'assets/OPLAN KRUS/OK2.jpg', title: 'OPLAN KRUS' },
-            { src: 'assets/OPLAN BALLAAG/OB1.jpg', title: 'OPLAN BALLAAG' },
-            { src: 'assets/OPLAN BALLAAG/OB2.jpg', title: 'OPLAN BALLAAG' },
-            { src: 'assets/ELECTION/ELECT3.jpg', title: 'ELECTION 2026' },
-            { src: 'assets/OPLAN KRUS/OK3.jpg', title: 'OPLAN KRUS' }
+        // Gallery Data
+        const galleryData = [
+            { src: 'assets/ELECTION/ELECT1.jpg', tag: 'Election 2026' },
+            { src: 'assets/ELECTION/ELECT2.jpg', tag: 'Election 2026' },
+            { src: 'assets/OPLAN KRUS/OK11.jpg', tag: 'Oplan Krus' },
+            { src: 'assets/OPLAN KRUS/OK2.jpg', tag: 'Oplan Krus' },
+            { src: 'assets/OPLAN BALLAAG/OB1.jpg', tag: 'Oplan Ballaag' },
+            { src: 'assets/OPLAN BALLAAG/OB2.jpg', tag: 'Oplan Ballaag' },
+            { src: 'assets/ELECTION/ELECT3.jpg', tag: 'Election 2026' },
+            { src: 'assets/OPLAN KRUS/OK3.jpg', tag: 'Oplan Krus' }
         ];
 
         let currentIndex = 0;
         let autoPlayInterval;
-        let isPlaying = true;
 
-        const grid = document.getElementById('mainGrid');
+        // Initialize Gallery
+        const grid = document.getElementById('thumbnailGrid');
         const track = document.getElementById('modalTrack');
-        const modal = document.getElementById('galleryModal');
-        const caption = document.getElementById('imageCaption');
 
-        // 1. Initialize Thumbnails and Modal Slides
-        function initGallery() {
-            galleryImages.forEach((img, idx) => {
-                // Add to Grid
-                const thumb = document.createElement('div');
-                thumb.className = 'thumb-item';
-                thumb.innerHTML = `<img src="${img.src}" class="w-full h-full object-cover" loading="lazy">`;
-                thumb.onclick = () => openGallery(idx);
-                grid.appendChild(thumb);
+        galleryData.forEach((img, idx) => {
+            // Create Thumbnails
+            const thumb = document.createElement('div');
+            thumb.className = 'thumb-item';
+            thumb.innerHTML = `<img src="${img.src}" class="w-full h-full object-cover">`;
+            thumb.onclick = () => openGallery(idx);
+            grid.appendChild(thumb);
 
-                // Add to Modal Track
-                const slide = document.createElement('div');
-                slide.className = 'modal-slide';
-                slide.innerHTML = `<img src="${img.src}">`;
-                track.appendChild(slide);
-            });
-        }
+            // Create Modal Slides
+            const slide = document.createElement('div');
+            slide.className = 'modal-slide';
+            slide.innerHTML = `<img src="${img.src}">`;
+            track.appendChild(slide);
+        });
 
-        // 2. Open Gallery & Start Carousel
         function openGallery(index) {
             currentIndex = index;
-            modal.style.display = 'flex';
-            updateCarousel();
+            document.getElementById('galleryModal').style.display = 'flex';
+            updateSlide();
             startAutoplay();
-            document.body.style.overflow = 'hidden'; // Prevent scroll
         }
 
         function closeGallery() {
-            modal.style.display = 'none';
-            stopAutoplay();
-            document.body.style.overflow = 'auto';
+            document.getElementById('galleryModal').style.display = 'none';
+            clearInterval(autoPlayInterval);
         }
 
-        // 3. Carousel Logic
-        function updateCarousel() {
-            const offset = -currentIndex * 100;
-            track.style.transform = `translateX(${offset}%)`;
-            caption.innerText = galleryImages[currentIndex].title;
+        function updateSlide() {
+            track.style.transform = `translateX(-${currentIndex * 100}%)`;
+            document.getElementById('modalCaption').innerText = galleryData[currentIndex].tag;
         }
 
         function nextSlide() {
-            currentIndex = (currentIndex + 1) % galleryImages.length;
-            updateCarousel();
+            currentIndex = (currentIndex + 1) % galleryData.length;
+            updateSlide();
         }
 
         function prevSlide() {
-            currentIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
-            updateCarousel();
+            currentIndex = (currentIndex - 1 + galleryData.length) % galleryData.length;
+            updateSlide();
         }
 
-        // 4. Autoplay Logic
         function startAutoplay() {
-            stopAutoplay(); // Clear existing
-            isPlaying = true;
-            document.getElementById('playPauseBtn').innerHTML = '<i class="fa-solid fa-pause"></i>';
-            autoPlayInterval = setInterval(nextSlide, 3000); // Change image every 3 seconds
-        }
-
-        function stopAutoplay() {
             clearInterval(autoPlayInterval);
-            isPlaying = false;
-            document.getElementById('playPauseBtn').innerHTML = '<i class="fa-solid fa-play"></i>';
+            autoPlayInterval = setInterval(nextSlide, 3000);
         }
-
-        function toggleAutoplay() {
-            isPlaying ? stopAutoplay() : startAutoplay();
-        }
-
-        // Keyboard support
-        document.addEventListener('keydown', (e) => {
-            if (modal.style.display === 'flex') {
-                if (e.key === 'ArrowRight') nextSlide();
-                if (e.key === 'ArrowLeft') prevSlide();
-                if (e.key === 'Escape') closeGallery();
-            }
-        });
-
-        window.onload = initGallery;
     </script>
 </body>
 </html>
