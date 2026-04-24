@@ -10,15 +10,12 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         * { font-family: 'Inter', sans-serif; }
         .glass-panel { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); }
-        
         .table-container::-webkit-scrollbar { height: 6px; }
         .table-container::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
-        
         @media print {
             nav, .no-print, .del-col, #loginModal { display: none !important; }
             body { background: white; color: black; }
         }
-
         #loginModal { backdrop-filter: blur(8px); }
     </style>
 </head>
@@ -32,15 +29,18 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-800">Admin Access</h2>
-                <p class="text-slate-500 text-sm mt-1">Please enter your credentials</p>
+                <h2 class="text-2xl font-bold text-slate-800">System Access</h2>
+                <p class="text-slate-500 text-sm mt-1">Select user and enter passcode</p>
             </div>
             
             <div class="space-y-4">
                 <div>
-                    <label class="text-[10px] font-bold text-indigo-600 uppercase ml-1">Username</label>
-                    <input type="text" id="usernameInput" placeholder="Admin Name" 
-                        class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-center">
+                    <label class="text-[10px] font-bold text-indigo-600 uppercase ml-1">Select User</label>
+                    <select id="usernameInput" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all bg-slate-50 cursor-pointer">
+                        <option value="VP DARWIN C. AGULLANA">VP DARWIN C. AGULLANA</option>
+                        <option value="PMAJ KRISTIAN LEE G BADUA">PMAJ KRISTIAN LEE G BADUA</option>
+                        <option value="INPPO PCADU">INPPO PCADU</option>
+                    </select>
                 </div>
 
                 <div>
@@ -54,7 +54,7 @@
                     Unlock Registry
                 </button>
                 
-                <p id="errorMsg" class="text-red-500 text-xs text-center font-medium hidden">Invalid credentials. Access denied.</p>
+                <p id="errorMsg" class="text-red-500 text-xs text-center font-medium hidden">Invalid passcode. Access denied.</p>
             </div>
         </div>
     </div>
@@ -67,7 +67,10 @@
                 </div>
                 <div class="flex flex-col">
                     <span class="text-white font-bold text-sm sm:text-lg truncate max-w-[120px] sm:max-w-none">KKDAT Ilocandia Inc Registry</span>
-                    <span id="liveStatus" class="text-[8px] text-emerald-400 font-bold uppercase tracking-widest animate-pulse">● Live Syncing</span>
+                    <div class="flex items-center gap-2">
+                        <span id="liveStatus" class="text-[8px] text-emerald-400 font-bold uppercase tracking-widest animate-pulse">● Live</span>
+                        <span id="activeUserDisplay" class="text-[8px] text-indigo-300 font-bold uppercase border-l border-white/20 pl-2">User: Guest</span>
+                    </div>
                 </div>
             </div>
             <div class="flex gap-2 sm:gap-4">
@@ -81,8 +84,8 @@
     <div class="relative max-w-[98%] mx-auto pt-24 px-2 sm:px-4">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4 px-2">
             <div>
-                <h1 class="text-2xl sm:text-3xl font-bold text-white uppercase tracking-tight">KKDAT Ilocandia Inc Member Database</h1>
-                <p class="text-indigo-200 text-xs sm:text-sm">Official Records - Synchronized with KKDAT database</p>
+                <h1 class="text-2xl sm:text-3xl font-bold text-white uppercase tracking-tight">KKDAT Member Database</h1>
+                <p class="text-indigo-200 text-xs sm:text-sm">Monitoring Active Session...</p>
             </div>
             
             <div class="flex flex-wrap items-center gap-3 w-full md:w-auto no-print">
@@ -130,7 +133,6 @@
     </div>
 
     <script>
-        // CONFIGURATION: Add multiple users here
         const AUTHORIZED_USERS = {
             "VP DARWIN C. AGULLANA": "11061996",
             "PMAJ KRISTIAN LEE G BADUA": "PacificLee",
@@ -138,28 +140,30 @@
         };
 
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw39tfv_1JoA5fkzQT0W9W4vK6Vj1qWDbIBVs54lRk6KTRbfsrbT4Wsj5FfKWs0yOqndA/exec";
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/1o98Bj1tqKQOo_xdGNDNNW8h1SS_kTdYyFASBIhaK5ts/edit?usp=sharing";
-
+        
         let allMembers = [];
         let isDeleting = false;
 
         function checkInitialAccess() {
-            if (sessionStorage.getItem('isAuthorized') === 'true') {
+            const auth = sessionStorage.getItem('isAuthorized');
+            const user = sessionStorage.getItem('currentUser');
+            if (auth === 'true' && user) {
                 document.getElementById('loginModal').classList.add('hidden');
+                document.getElementById('activeUserDisplay').innerText = `User: ${user}`;
                 fetchData();
             }
         }
 
         function validateAccess() {
-            const user = document.getElementById('usernameInput').value.toLowerCase().trim();
+            const user = document.getElementById('usernameInput').value; // Get value from dropdown
             const pass = document.getElementById('passcodeInput').value;
             const errorElement = document.getElementById('errorMsg');
 
-            // Check if user exists and passcode matches
-            if (AUTHORIZED_USERS[user] && AUTHORIZED_USERS[user] === pass) {
+            if (AUTHORIZED_USERS[user] === pass) {
                 sessionStorage.setItem('isAuthorized', 'true');
                 sessionStorage.setItem('currentUser', user);
                 document.getElementById('loginModal').classList.add('hidden');
+                document.getElementById('activeUserDisplay').innerText = `User: ${user}`;
                 fetchData();
             } else {
                 errorElement.classList.remove('hidden');
@@ -182,7 +186,6 @@
             } catch (error) { console.error("Fetch Error:", error); }
         }
 
-        // Logic for Table Rendering and Filtering (remains mostly same as your original)
         function updateChapterFilterOptions(data) {
             const select = document.getElementById('chapterFilter');
             const chapters = [...new Set(data.map(m => (m.chapter || 'UNASSIGNED').toUpperCase()))].sort();
@@ -248,14 +251,9 @@
             } catch (error) { isDeleting = false; fetchData(); }
         }
 
-        // Initialize
         checkInitialAccess();
-        setInterval(fetchData, 30000); // Increased interval to 30s to reduce server load
-
-        // Enter key listener for both inputs
-        [document.getElementById('usernameInput'), document.getElementById('passcodeInput')].forEach(input => {
-            input.addEventListener('keypress', (e) => { if (e.key === 'Enter') validateAccess(); });
-        });
+        setInterval(fetchData, 30000);
+        document.getElementById('passcodeInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') validateAccess(); });
     </script>
 </body>
 </html>
